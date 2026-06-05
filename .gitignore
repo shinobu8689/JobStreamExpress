@@ -1,6 +1,7 @@
 # Ignore config files
 avoid_keywords.txt
 fluff_keywords.txt
+profile.json
 
 # Ignore folders
 __pycache__

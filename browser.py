@@ -4,12 +4,13 @@ Fires once per unique URL navigation on the main frame only.
 """
 
 import asyncio
-import os
 from pathlib import Path
 from playwright.async_api import async_playwright, Page, Frame
 
 from job_detector import is_job_page, extract_job_content
 from job_cleaner import clean_job
+from job_analyser import analyse_job, print_report
+import os
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -68,6 +69,11 @@ async def on_frame_navigated(frame: Frame, page: Page) -> str | None:
 
     if not clean.passed:
         return None   # avoid-keyword hit — discard silently
+
+    # ── Step 3: LLM analysis + profile comparison ────────────────────
+    result = analyse_job(clean.cleaned_text)
+    if result is not None:
+        print_report(result)
 
     return clean.cleaned_text
 
@@ -132,18 +138,16 @@ async def run() -> None:
         if START_URL != "about:blank":
             await page.goto(START_URL)
 
-
-        
         print(f"[browser] Profile: {PROFILE_DIR}")
         print("[browser] Browse normally. Job pages are detected automatically.")
         print("[browser] Close the browser window to exit.\n")
 
         async def handle_navigation(frame: Frame, p: Page) -> None:
             job_string = await on_frame_navigated(frame, p)
-            if job_string:
-                print("\n" + "═" * 60)
-                print(job_string)
-                print("═" * 60 + "\n")
+            #if job_string:
+            #    print("\n" + "═" * 60)
+            #    print(job_string)
+            #    print("═" * 60 + "\n")
 
         def attach_listener(p: Page) -> None:
             p.on(

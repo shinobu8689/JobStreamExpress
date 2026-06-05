@@ -34,7 +34,6 @@ URL_JOB_PATTERNS = [
     r"/jd/",
     r"seek\.com\.au/job/",
     r"au\.indeed\.com/",
-    r"hk\.indeed\.com/",
 ]
 
 JOB_CONTENT_SIGNALS = [

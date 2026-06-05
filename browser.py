@@ -4,10 +4,12 @@ Fires once per unique URL navigation on the main frame only.
 """
 
 import asyncio
+import os
 from pathlib import Path
 from playwright.async_api import async_playwright, Page, Frame
 
 from job_detector import is_job_page, extract_job_content
+from job_cleaner import clean_job
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -47,6 +49,7 @@ async def on_frame_navigated(frame: Frame, page: Page) -> str | None:
     url  = page.url
     html = await page.content()
 
+    os.system('cls' if os.name == 'nt' else 'clear')
     print(f"\n[browser] Navigated → {url}")
 
     if not is_job_page(html, url):
@@ -57,10 +60,16 @@ async def on_frame_navigated(frame: Frame, page: Page) -> str | None:
 
     result = extract_job_content(html)
 
-    if isinstance(result, dict):
-        return dict_to_string(result)
-    else:
-        return result   # raw text from generic fallback — no further parsing
+    job_text = dict_to_string(result) if isinstance(result, dict) else result
+
+    # ── Step 2: clean + keyword scan ─────────────────────────────────────
+    clean = clean_job(job_text)
+    print(f"[cleaner] {clean.summary()}")
+
+    if not clean.passed:
+        return None   # avoid-keyword hit — discard silently
+
+    return clean.cleaned_text
 
 
 def dict_to_string(info: dict) -> str:
@@ -123,6 +132,8 @@ async def run() -> None:
         if START_URL != "about:blank":
             await page.goto(START_URL)
 
+
+        
         print(f"[browser] Profile: {PROFILE_DIR}")
         print("[browser] Browse normally. Job pages are detected automatically.")
         print("[browser] Close the browser window to exit.\n")

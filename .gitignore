@@ -1,0 +1,6 @@
+# Ignore config files
+avoid_keywords.txt
+fluff_keywords.txt
+
+# Ignore folders
+__pycache__

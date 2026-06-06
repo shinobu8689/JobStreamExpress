@@ -1,0 +1,129 @@
+{
+  "_comment": "canonical skill name → list of aliases (all lowercase). The normaliser maps any alias back to the canonical name.",
+
+  "windows": [
+    "microsoft windows", "windows os", "windows operating system",
+    "windows 10", "windows 11", "windows 10/11", "win10", "win11",
+    "windows 7", "windows server", "windows environments"
+  ],
+  "linux": [
+    "linux os", "ubuntu", "debian", "centos", "rhel", "fedora",
+    "linux/unix", "unix", "bash", "shell scripting"
+  ],
+  "python": [
+    "python 3", "python3", "py", "python scripting"
+  ],
+  "javascript": [
+    "js", "es6", "es2015", "vanilla js", "node.js", "nodejs", "node", "javascript/typescript"
+  ],
+  "typescript": [
+    "ts", "javascript/typescript"
+  ],
+  "git": [
+    "github", "gitlab", "bitbucket", "version control", "git/github",
+    "source control", "source control (git)"
+  ],
+  "sql": [
+    "mysql", "postgresql", "postgres", "sqlite", "mssql",
+    "microsoft sql server", "t-sql", "pl/sql", "database queries",
+    "relational databases"
+  ],
+  "rest api": [
+    "rest", "restful", "rest apis", "restful api", "restful apis",
+    "rest services", "rest api integration", "api integration",
+    "http api", "web api", "rest/grpc apis"
+  ],
+  "docker": [
+    "containerisation", "containerization", "containers", "docker compose"
+  ],
+  "ci/cd": [
+    "continuous integration", "continuous deployment", "continuous delivery",
+    "github actions", "gitlab ci", "jenkins", "pipelines", "ci/cd pipelines"
+  ],
+  "agile": [
+    "agile methodology", "agile methodologies", "agile development",
+    "scrum", "kanban", "sprint", "agile/scrum", "agile and scrum methodologies",
+    "agile delivery environments"
+  ],
+  "microsoft 365": [
+    "m365", "office 365", "o365", "microsoft office", "ms office",
+    "outlook", "microsoft teams", "teams", "sharepoint", "onedrive",
+    "ms teams"
+  ],
+  "active directory": [
+    "ad", "azure ad", "azure active directory", "microsoft entra",
+    "entra id", "ldap", "identity management"
+  ],
+  "networking": [
+    "computer networking", "network administration", "lan", "wan",
+    "tcp/ip", "dns", "dhcp", "vpn", "network troubleshooting",
+    "network infrastructure", "cisco", "switching", "routing"
+  ],
+  "troubleshooting": [
+    "technical troubleshooting", "it troubleshooting", "problem solving",
+    "fault finding", "hardware troubleshooting", "software troubleshooting",
+    "technical support", "it support", "desktop support", "helpdesk",
+    "help desk", "service desk"
+  ],
+  "java": [
+    "java 8", "java 11", "java 17", "jvm", "spring", "spring boot"
+  ],
+  "c++": [
+    "c/c++", "c / c++", "cpp"
+  ],
+  "ai": [
+    "artificial intelligence", "machine learning", "ml", "deep learning",
+    "llm", "llms", "large language models", "generative ai", "genai",
+    "prompt engineering", "github copilot", "ai tools"
+  ],
+  "jira": [
+    "atlassian jira", "jira software", "issue tracking", "ticket management"
+  ],
+  "html": [
+    "html5", "html/css", "markup"
+  ],
+  "css": [
+    "css3", "scss", "sass", "stylesheets"
+  ],
+  "intune": [
+    "microsoft intune", "mdm", "mobile device management",
+    "endpoint management", "microsoft endpoint manager"
+  ],
+  "application development": [
+    "web-based applications development", "windows application development",
+    "web development", "desktop application development", "app development",
+    "web application development principles", "full stack development"
+  ],
+  "software development life cycle": [
+    "SDLC"
+  ],
+  "aws": [
+    "amazon web services", "aws cloud", "aws services", "aws infrastructure", "aws sam", "aws lambda", "aws cloudformation"
+  ],
+  "aws ec2": [
+    "aws ec2", "ec2"
+  ],
+  "aws s3": [
+    "aws s3", "s3"
+  ],
+  "azure": [
+    "microsoft azure", "azure cloud", "azure services", "azure infrastructure"
+  ],
+  "devops": [
+    "development operations", "dev ops", "devsecops", "development and operations",
+    "development & operations", "dev and ops", "dev & ops","devops practices", "devops culture"
+  ],
+  "LLM": [
+    "large language models", "llms", "gpt", "chatgpt", "gemini", "llm applications", "ai/llm integration "
+  ],
+  "ai-assisted development": [
+    "ai-assisted coding", "ai-assisted programming", "ai code generation",
+    "github copilot", "ai pair programming", "ai code review", "claude code", "Codex"
+  ],
+  "scripting": [
+    "automation scripting", "shell scripting", "python scripting",
+    "powershell scripting", "bash scripting", "scripting languages"
+  ],
+  "api":[
+    "application programming interface", "apis"]
+}

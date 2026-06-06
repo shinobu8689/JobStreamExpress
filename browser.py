@@ -10,6 +10,7 @@ from playwright.async_api import async_playwright, Page, Frame
 from job_detector import is_job_page, extract_job_content
 from job_cleaner import clean_job
 from job_analyser import analyse_job, print_report
+from skill_registry import startup_update
 import os
 
 
@@ -138,6 +139,7 @@ async def run() -> None:
         if START_URL != "about:blank":
             await page.goto(START_URL)
 
+        startup_update()
         print(f"[browser] Profile: {PROFILE_DIR}")
         print("[browser] Browse normally. Job pages are detected automatically.")
         print("[browser] Close the browser window to exit.\n")

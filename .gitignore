@@ -2,6 +2,8 @@
 avoid_keywords.txt
 fluff_keywords.txt
 profile.json
+skill_registry.json
+skill_suggestions.txt
 
 # Ignore folders
 __pycache__

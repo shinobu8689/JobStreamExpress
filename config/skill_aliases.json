@@ -78,7 +78,9 @@
     "api integration",
     "http api",
     "web api",
-    "rest/grpc apis"
+    "rest/grpc apis",
+    "rest api design",
+    "rest/soap apis"
   ],
   "docker": [
     "containerisation",
@@ -94,7 +96,8 @@
     "gitlab ci",
     "jenkins",
     "pipelines",
-    "ci/cd pipelines"
+    "ci/cd pipelines",
+    "ci/cd practices"
   ],
   "agile": [
     "agile methodology",
@@ -165,7 +168,9 @@
     "java 17",
     "jvm",
     "spring",
-    "spring boot"
+    "spring boot",
+    "java web development",
+    "java backend development"
   ],
   "c++": [
     "c/c++",
@@ -222,7 +227,8 @@
     "web application development"
   ],
   "software development life cycle": [
-    "SDLC"
+    "SDLC",
+    "software development lifecycle (sdlc)"
   ],
   "aws": [
     "amazon web services",
@@ -296,5 +302,10 @@
   "c": [
     "c programming",
     "c language"
+  ],
+  "nv1 clearance": [
+    "nv1",
+    "nv1 security clearance",
+    "security clearance"
   ]
 }

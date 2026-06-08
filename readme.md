@@ -1,8 +1,6 @@
 todo
-- jobs auto navigate
-- LLM cover letter
-- LLM Suggestion
 - japanese support
+
 
 usage:
 

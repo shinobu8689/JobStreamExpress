@@ -264,9 +264,30 @@ def _score_label(result: AnalysisResult) -> tuple[float, str, str]:
 
 
 def _url_to_slug(url: str) -> str:
-    """Convert a URL into a safe filename stem (max 120 chars)."""
+    """
+    Extract a stable filename stem from a job URL.
+
+    Priority:
+      1. Numeric job ID from the URL path — e.g. seek.com.au/job/91995152 -> "91995152"
+         Covers Seek, Indeed, and most ATS systems that put IDs in the path.
+      2. Sanitised URL fallback for boards without a numeric ID.
+
+    Two URLs for the same job with different ?ref= or #sol= params
+    resolve to the same filename and are correctly identified as duplicates.
+    """
+    # Match a numeric ID anywhere after a job-related path segment
+    # Handles: /job/123, /jobs/view/123, /position/123, /opening/123 etc.
+    m = re.search(
+        r"/(?:jobs?|jobdetail|position|opening|vacancy)(?:/[^/]+)?/(\d{5,})",
+        url, re.IGNORECASE
+    )
+    if m:
+        return m.group(1)
+
+    # Fallback — strip query string and fragment, then sanitise
     slug = re.sub(r"https?://", "", url)
-    slug = re.sub(r"[\\/:*?\"<>|&=#]", "_", slug)
+    slug = slug.split("?")[0].split("#")[0]
+    slug = re.sub(r'[/:*?"<>|&=#\\]', "_", slug)
     slug = re.sub(r"_+", "_", slug).strip("_")
     return slug[:120]
 

@@ -385,12 +385,47 @@ async def crawl(search_url: str, max_pages: int, base_delay: float,
             await human_scroll(page, direction="up", steps=random.randint(1, 3))
             await human_delay(1.0, 2.5)
 
-            next_btn = await page.query_selector(SEEK_NEXT_PAGE)
+            # ── Next page detection ───────────────────────────────────────
+            # Seek renders pagination inside a <nav> — give it time to appear
+            next_btn = None
+            for selector in [
+                "[data-automation='page-next']",
+                "a[aria-label='Next']",
+                "a[aria-label='next']",
+                "button[aria-label='Next']",
+                "nav a[rel='next']",
+                "li.pagination-next a",
+            ]:
+                next_btn = await page.query_selector(selector)
+                if next_btn:
+                    print(f"[crawler] Next page found via: {selector}")
+                    break
+
             if not next_btn:
-                print("[crawler] No next page — crawl complete.")
+                # Last-resort: scan all links/buttons for "Next" text
+                candidates = await page.query_selector_all("a, button")
+                for el in candidates:
+                    try:
+                        txt = (await el.inner_text()).strip().lower()
+                        aria = (await el.get_attribute("aria-label") or "").lower()
+                        if txt in ("next", "next page", "›", "»") or "next" in aria:
+                            next_btn = el
+                            print(f"[crawler] Next page found via text: '{txt or aria}'")
+                            break
+                    except Exception:
+                        continue
+
+            if not next_btn:
+                print("[crawler] No next page button found — crawl complete.")
                 break
-            if await next_btn.get_attribute("disabled") is not None:
-                print("[crawler] Next page disabled — crawl complete.")
+
+            # Check disabled state — Seek uses aria-disabled or disabled attr
+            is_disabled = (
+                await next_btn.get_attribute("disabled") is not None
+                or (await next_btn.get_attribute("aria-disabled")) == "true"
+            )
+            if is_disabled:
+                print("[crawler] Next page button is disabled — crawl complete.")
                 break
 
             await human_mouse_move(page, next_btn)

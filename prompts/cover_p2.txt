@@ -1,0 +1,13 @@
+Write one concise paragraph in first-person perspective describing the candidate's relevant skills.
+
+Matched skills: {matched_skills}
+Candidate projects: {projects}
+
+Guidelines:
+- Highlight 3-5 of the most relevant skills.
+- Reference 1-2 specific projects naturally.
+- Confident and professional tone.
+- One paragraph only.
+- Do not invent skills beyond what is provided.
+
+Return the paragraph only.

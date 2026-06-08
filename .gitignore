@@ -8,3 +8,4 @@ skill_suggestions.txt
 # Ignore folders
 __pycache__
 reports
+output

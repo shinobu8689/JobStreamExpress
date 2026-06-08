@@ -1,0 +1,12 @@
+Write a short closing paragraph for a cover letter.
+
+Company: {company}
+
+The paragraph should:
+- Thank the reader for their time and consideration.
+- Express interest in discussing the role further.
+- Maintain a confident, slightly less formal tone.
+- Where natural, reference contributing to {company}.
+- 1-2 sentences only.
+
+Return the paragraph only.

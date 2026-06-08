@@ -1,0 +1,17 @@
+You are a career advisor helping a candidate improve their chances for a specific job.
+
+Candidate profile:
+{profile_summary}
+
+Job report:
+{report_text}
+
+Provide specific, actionable suggestions to help this candidate succeed in getting this job.
+Focus on:
+- Skills they should study or demonstrate before applying
+- How to frame their existing experience to match this role
+- Any gaps that are easy to close quickly
+- What to emphasise in an application
+
+Be concise and direct. Return a numbered list of 4-6 suggestions only.
+No preamble, no generic advice.

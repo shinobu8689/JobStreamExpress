@@ -1,0 +1,12 @@
+Write a short paragraph explaining why the candidate is interested in working at {company}.
+
+Company focus: {company_focus}
+
+Instructions:
+- Explain clearly why the company's work is appealing.
+- Emphasise genuine interest in contributing rather than generic praise.
+- Confident, professional, natural tone.
+- 1-2 sentences only.
+- Do not invent experiences or skills.
+
+Return the paragraph only.

@@ -1,0 +1,15 @@
+Write a concise and professional opening paragraph for a cover letter in first-person perspective.
+
+Job Title: {title}
+Company: {company}
+Job Platform: {platform}
+
+Instructions:
+- Address the Hiring Manager.
+- Express interest in the {title} role at {company}.
+- Mention that the job was found on {platform}.
+- Keep the tone confident, professional, and technical.
+- Avoid clichés like "I am writing to express my interest."
+- Be concise (2-3 sentences), precise, and natural.
+
+Return the paragraph only.

@@ -4,6 +4,7 @@
     "microsoft windows",
     "windows os",
     "windows operating system",
+    "windows operating systems",
     "windows 10",
     "windows 11",
     "windows 10/11",
@@ -11,7 +12,9 @@
     "win11",
     "windows 7",
     "windows server",
-    "windows environments"
+    "windows environments",
+    "microsoft environments",
+    "windows desktop environments"
   ],
   "linux": [
     "linux os",
@@ -23,7 +26,8 @@
     "linux/unix",
     "unix",
     "bash",
-    "shell scripting"
+    "shell scripting",
+    "rocky linux"
   ],
   "python": [
     "python 3",
@@ -112,6 +116,7 @@
   ],
   "microsoft 365": [
     "m365",
+    "ms office 365",
     "office 365",
     "o365",
     "microsoft office",
@@ -145,7 +150,8 @@
     "network infrastructure",
     "cisco",
     "switching",
-    "routing"
+    "routing",
+    "connectivity troubleshooting"
   ],
   "troubleshooting": [
     "technical troubleshooting",
@@ -160,7 +166,8 @@
     "helpdesk",
     "help desk",
     "service desk",
-    "wi-fi troubleshooting"
+    "wi-fi troubleshooting",
+    "troubleshooting and problem-solving"
   ],
   "java": [
     "java 8",
@@ -286,7 +293,8 @@
     "ai pair programming",
     "ai code review",
     "claude code",
-    "Codex"
+    "Codex",
+    "ai-assisted tools"
   ],
   "scripting": [
     "automation scripting",
@@ -308,5 +316,20 @@
     "nv1",
     "nv1 security clearance",
     "security clearance"
+  ],
+  "programming": [
+    "scripting"
+  ],
+  "itsm platforms": [
+    "service now",
+    "bmc remedy",
+    "cherwell",
+    "freshservice",
+    "ivanti",
+    "itsm tools",
+    "itsm ticketing tools"
+  ],
+  "hardware setup": [
+    "hardware configuration"
   ]
 }

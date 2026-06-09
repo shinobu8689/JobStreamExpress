@@ -2,7 +2,7 @@
 # Edit these values to change the model or Ollama endpoint.
 
 # Model to use — must be pulled in Ollama first: `ollama pull gemma4:12b`
-# Options: gemma4:e4b (fast), gemma4:12b (balanced), gemma43:26b (best quality)
+# Options: gemma4:e4b (fast), gemma4:12b (balanced), gemma4:26b (best quality)
 model=gemma4:12b
 
 # Ollama API endpoint
@@ -10,3 +10,10 @@ url=http://localhost:11434/api/generate
 
 # Max tokens for LLM response
 max_tokens=2048
+
+# Max tokens for LLM response
+max_tokens=4096
+
+# Japanese jobs — larger model recommended for better structured output
+# Comment out to use the same model as above
+model_ja=gemma4:12b

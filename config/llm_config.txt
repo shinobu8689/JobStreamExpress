@@ -1,9 +1,9 @@
 # LLM configuration for job_analyser.py
 # Edit these values to change the model or Ollama endpoint.
 
-# Model to use — must be pulled in Ollama first: `ollama pull gemma3:12b`
-# Options: gemma3:4b (fast), gemma3:12b (balanced), gemma3:27b (best quality)
-model=gemma4:e4b
+# Model to use — must be pulled in Ollama first: `ollama pull gemma4:12b`
+# Options: gemma4:e4b (fast), gemma4:12b (balanced), gemma43:26b (best quality)
+model=gemma4:12b
 
 # Ollama API endpoint
 url=http://localhost:11434/api/generate

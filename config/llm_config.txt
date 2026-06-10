@@ -8,11 +8,12 @@ model=gemma4:12b
 # Ollama API endpoint
 url=http://localhost:11434/api/generate
 
-# Max tokens for LLM response
-max_tokens=2048
-
-# Max tokens for LLM response
+# Max output tokens for LLM response
 max_tokens=4096
+
+# Context window size — must be large enough to hold the prompt + response.
+# Raise this if you get empty responses (model silently overflows its context).
+num_ctx=8192
 
 # Japanese jobs — larger model recommended for better structured output
 # Comment out to use the same model as above

@@ -174,6 +174,10 @@ def extract_job_content(html: str) -> "dict | str":
     if soup.find(attrs={"data-automation": "jobAdDetails"}):
         return _extract_seek(soup)
 
+    # Mynavi (tenshoku.mynavi.jp and related)
+    if soup.select_one(".occName") or soup.select_one(".majorJobOfferTable"):
+        return _extract_mynavi(soup)
+
     # Generic fallback → raw text for job_parser.py
     container = None
     for selector in JOB_CONTAINER_SELECTORS:
@@ -256,7 +260,86 @@ def _extract_seek(soup) -> dict:
     }
 
 
+# ── Mynavi structured extractor ───────────────────────────────────────────────
+
+def _extract_mynavi(soup) -> dict:
+    """
+    Extracts structured data from Mynavi (tenshoku.mynavi.jp) job pages.
+
+    Header fields come from the .cassetteOfferRecapitulate summary block.
+    Body content is collected from .cassetteJobOffer sections (each section
+    covers one topic: 仕事内容, 求める人材, 福利厚生, etc.).
+    """
+    def grab(selector: str) -> str:
+        el = soup.select_one(selector)
+        return _txt(el) if el else ""
+
+    # ── Structured header ──────────────────────────────────────────────────────
+    title      = grab(".occName")
+    company    = grab(".companyName")
+    tagline    = grab(".companyNameAdd")
+    location   = grab(".majorJobOfferTable__item.location dd")
+    salary     = grab(".majorJobOfferTable__item.salary dd")
+    employment = grab(".majorJobOfferTable__item.employment dd")
+    date_info  = grab(".dateInfo")
+
+    # Condition labels (remote OK, no-experience, etc.) → classification string
+    labels = [_txt(el) for el in soup.select(".cassetteRecruit__attribute .labelCondition")
+              if _txt(el)]
+
+    # ── Strip elements that pollute the description ────────────────────────────
+    # Header block already captured above — remove so it doesn't reappear
+    for el in soup.select(".cassetteOfferRecapitulate"):
+        el.decompose()
+    # Tooltips (salary disclaimer text), readMore UI, logo images
+    for el in soup.select(".tooltip, .tooltip__content, .readMore, .statusIcon, img"):
+        el.decompose()
+
+    # ── Description body ───────────────────────────────────────────────────────
+    # Try named content containers in order; collect all matching sections.
+    desc_lines: list[str] = []
+    for sel in [".cassetteJobOffer", ".jobPointArea", ".jobOfferDetail",
+                "#jobOfferDetail", ".jobOffer__detail", ".tabBody"]:
+        for el in soup.select(sel):
+            if len(el.get_text(strip=True)) > 100:
+                desc_lines.extend(_render_element(el))
+                desc_lines.append("")
+        if desc_lines:
+            break
+
+    description = re.sub(r"\n{3,}", "\n\n", "\n".join(desc_lines)).strip()
+
+    if tagline:
+        description = f"会社アピール: {tagline}\n\n{description}" if description else f"会社アピール: {tagline}"
+
+    return {
+        "title":          title,
+        "company":        company,
+        "location":       location,
+        "salary":         salary,
+        "job_type":       employment,
+        "classification": "  ".join(labels),
+        "posted":         date_info,
+        "description":    description,
+        "questions":      "",
+        "requirements":   [],
+        "responsibilities": [],
+        "benefits":       [],
+    }
+
+
 # ── DOM renderer ───────────────────────────────────────────────────────────────
+
+# Matches text nodes that are developer/CSS annotations, not real content:
+#   /* comment */          — JS/CSS block comments embedded as text nodes
+#   /.className            — closing-tag comment shortcuts (Mynavi convention)
+#   /[sectionName]         — bracket-style closing markers
+_RENDER_NOISE_RE = re.compile(r'^/\*|^/[.\[(]|^/[a-z]\w*__')
+
+
+def _is_render_noise(text: str) -> bool:
+    return bool(_RENDER_NOISE_RE.match(text))
+
 
 BLOCK_TAGS = {
     "p", "div", "section", "article", "aside",
@@ -276,7 +359,7 @@ def _render_element(el) -> list[str]:
     for child in el.children:
         if isinstance(child, NavigableString):
             text = child.strip()
-            if text:
+            if text and not _is_render_noise(text):
                 lines.append(text)
 
         elif isinstance(child, Tag):

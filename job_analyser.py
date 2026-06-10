@@ -46,6 +46,7 @@ ANALYSE_PROMPT_JA = PROMPT_DIR / "analyse_ja.txt"
 DEFAULT_MODEL      = "gemma3:12b"
 DEFAULT_OLLAMA_URL = "http://localhost:11434/api/generate"
 DEFAULT_MAX_TOKENS = 4096
+DEFAULT_NUM_CTX    = 8192   # context window — must fit prompt + response
 
 
 # ── Skill normaliser ──────────────────────────────────────────────────────────
@@ -104,11 +105,14 @@ def get_normaliser() -> SkillNormaliser:
 def load_llm_config() -> dict:
     defaults = {
         "model":      DEFAULT_MODEL,
+        "model_ja":   "",              # optional — uses "model" if blank
         "url":        DEFAULT_OLLAMA_URL,
         "max_tokens": DEFAULT_MAX_TOKENS,
+        "num_ctx":    DEFAULT_NUM_CTX,
     }
     if not LLM_CONFIG_FILE.exists():
         return defaults
+    int_keys = {"max_tokens", "num_ctx"}
     for line in LLM_CONFIG_FILE.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
@@ -116,7 +120,7 @@ def load_llm_config() -> dict:
         key, _, val = line.partition("=")
         key, val = key.strip(), val.strip()
         if key in defaults:
-            defaults[key] = int(val) if key == "max_tokens" else val
+            defaults[key] = int(val) if key in int_keys else val
     return defaults
 
 
@@ -135,20 +139,31 @@ def load_prompt(path: Path, **kwargs) -> str:
 
 # ── LLM call ──────────────────────────────────────────────────────────────────
 
-def call_ollama(prompt: str, cfg: dict) -> str:
+def call_ollama(prompt: str, cfg: dict, model: str | None = None) -> str:
+    target_model = model or cfg["model"]
     try:
         resp = requests.post(
             cfg["url"],
             json={
-                "model":   cfg["model"],
+                "model":   target_model,
                 "prompt":  prompt,
                 "stream":  False,
-                "options": {"num_predict": int(cfg["max_tokens"])},
+                "options": {
+                    "num_predict": int(cfg["max_tokens"]),
+                    "num_ctx":     int(cfg["num_ctx"]),
+                },
             },
             timeout=120,
         )
         resp.raise_for_status()
-        return resp.json()["response"]
+        raw = resp.json()["response"]
+        if not raw.strip():
+            raise RuntimeError(
+                f"Empty response from {target_model} — context window too small? "
+                f"Current num_ctx={cfg['num_ctx']}. "
+                f"Try raising num_ctx in config/llm_config.txt."
+            )
+        return raw
     except requests.exceptions.ConnectionError:
         raise RuntimeError(
             f"Cannot reach Ollama at {cfg['url']}. Is it running? → `ollama serve`"
@@ -214,7 +229,8 @@ def _is_japanese(text: str) -> bool:
     return any('぀' <= c <= 'ヿ' or '一' <= c <= '鿿' for c in text)
 
 
-def _translate_ja_skills(ja_skills: list[str], cfg: dict) -> dict[str, str]:
+def _translate_ja_skills(ja_skills: list[str], cfg: dict,
+                         model: str | None = None) -> dict[str, str]:
     """Translate Japanese skill names to English via LLM. Returns {japanese: english}."""
     if not ja_skills:
         return {}
@@ -228,7 +244,7 @@ def _translate_ja_skills(ja_skills: list[str], cfg: dict) -> dict[str, str]:
     )
     print(f"[analyser] ⟲  Translating {len(ja_skills)} Japanese skill name(s)...")
     try:
-        raw = call_ollama(prompt, cfg)
+        raw = call_ollama(prompt, cfg, model=model)
         data = parse_json_response(raw)
         return {k: v.lower().strip() for k, v in data.items()
                 if isinstance(k, str) and isinstance(v, str)}
@@ -244,20 +260,21 @@ def analyse_job(cleaned_text: str, lang: str = "en", url: str = "",
     norm    = get_normaliser()
 
     # Truncate input to prevent context-window overflow.
-    # Japanese characters are information-dense; 5000 chars covers a full job post.
-    max_chars = 5000 if lang == "ja" else 8000
+    # Japanese characters are information-dense; 4000 chars covers a full job post.
+    max_chars = 4000 if lang == "ja" else 8000
     if len(cleaned_text) > max_chars:
         cleaned_text = cleaned_text[:max_chars]
         print(f"[analyser] ⚠  Input truncated to {max_chars} chars")
 
     prompt_file = ANALYSE_PROMPT_JA if lang == "ja" else ANALYSE_PROMPT
     lang_tag    = "ja 🇯🇵" if lang == "ja" else "en"
-    print(f"[analyser] ⟲  Calling {cfg['model']} (lang={lang_tag})...")
+    model       = (cfg["model_ja"] or cfg["model"]) if lang == "ja" else cfg["model"]
+    print(f"[analyser] ⟲  Calling {model} (lang={lang_tag})...")
     try:
         prompt  = load_prompt(prompt_file, text=cleaned_text)
         if debug:
             _save_temp("prompt", prompt, url)
-        raw_llm = call_ollama(prompt, cfg)
+        raw_llm = call_ollama(prompt, cfg, model=model)
     except Exception as e:
         print(f"[analyser] ✗  LLM call failed: {e}")
         return None
@@ -281,7 +298,7 @@ def analyse_job(cleaned_text: str, lang: str = "en", url: str = "",
         raw_optional = data.get("optional_skills") or []
         ja_only = list({s for s in raw_required + raw_optional if _is_japanese(s)})
         if ja_only:
-            ja_to_en = _translate_ja_skills(ja_only, cfg)  # {ja: en}
+            ja_to_en = _translate_ja_skills(ja_only, cfg, model=model)  # {ja: en}
             data["skills"]          = [ja_to_en.get(s, s) for s in raw_required]
             data["optional_skills"] = [ja_to_en.get(s, s) for s in raw_optional]
             skill_translations = {en: ja for ja, en in ja_to_en.items()}

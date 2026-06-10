@@ -69,6 +69,11 @@ DEFAULT_FLUFF_KEYWORDS = [
     "求人情報をシェア",              # "share job info"
     "※決済単位",                    # payment unit footnote (financial filing metadata)
     "決算情報",                      # financial results info (not relevant to job)
+    # Mynavi-specific noise
+    "マイナビ転職の勤務地区分では",  # intro to redundant prefecture classification list
+    "プロジェクト先によって異なります",  # generic "depends on project" transit filler
+    "最寄り駅",                      # "nearest station" header (value is always generic)
+    "閉じる",                        # "close" button text from read-more widgets
 ]
 
 # Sections whose headings signal the start of company-promo content.
@@ -121,6 +126,10 @@ JA_SKIP_SECTIONS = {
     "休日・休暇",       # holiday / vacation details
     "試用期間",         # trial period — duration already in the header zone
     "賃金形態",         # salary form details (redundant after the salary line)
+    "モデル年収例",     # model salary examples — verbose tables, no skills signal
+    "初年度の年収",     # salary tooltip explanation — legal boilerplate
+    "交通アクセス",     # transit access — not relevant for skill matching
+    "諸手当",           # allowance details — verbose itemisation
 }
 
 # Sections to keep partially — only lines that contain one of the given keywords
@@ -137,6 +146,9 @@ JA_SECTION_HEADERS = {
     "応募について", "選考の流れ", "応募する", "学歴・資格",
     "配属先情報", "紹介企業情報", "備考", "求人エントリーにあたって",
     "募集職種", "仕事に関するpr", "企業・求人の特色", "仕事の特徴",
+    # Mynavi-specific section headers
+    "モデル年収例", "初年度の年収", "交通アクセス", "諸手当",
+    "対象となる方", "昇給・賞与", "募集要項",
 }
 
 
@@ -248,8 +260,8 @@ def clean_job(text: str,
 
     # ── 0. Navigation artifact removal ───────────────────────────────────────
     # Strips breadcrumb links and separator chars leaked from HTML rendering.
-    # Targets:  [text](/relative-path)  and lone separator chars like  /  |  ›
-    _NAV_LINK_RE = re.compile(r"^\[.{0,50}\]\(/[^)]*\)\s*$")
+    # Targets:  [text](/relative-path)  [text](#anchor)  and lone separators
+    _NAV_LINK_RE = re.compile(r"^\[.{0,50}\]\((?:/|#)[^)]*\)\s*$")
     _NAV_SEP     = {"/", "|", "›", "»", "·", "・"}
     nav_stripped = []
     for ln in text.splitlines():
@@ -386,7 +398,20 @@ def clean_job(text: str,
         collapsed.append(line)
         prev_blank = is_blank
 
-    cleaned = "\n".join(collapsed).strip()
+    # ── 4b. Deduplicate long repeated lines ───────────────────────────────────
+    # Long identical lines (e.g. full prefecture lists) frequently appear twice
+    # on Japanese pages — once in the structured header, once in 募集要項.
+    seen_long: set[str] = set()
+    deduped: list[str] = []
+    for line in collapsed:
+        stripped = line.strip()
+        if len(stripped) > 50 and stripped in seen_long:
+            continue
+        deduped.append(line)
+        if len(stripped) > 50:
+            seen_long.add(stripped)
+
+    cleaned = "\n".join(deduped).strip()
 
     # ── 5. Experience extraction (on cleaned text) ────────────────────────────
     experience = extract_experience(cleaned)

@@ -14,7 +14,16 @@
     "windows server",
     "windows environments",
     "microsoft environments",
-    "windows desktop environments"
+    "windows desktop environments",
+    "windowsクライアントos",
+    "windows environment",
+    "windows applications",
+    "windows server (2016/2019/2022)",
+    "windows server 2019-2022",
+    "windows server 2022/2025",
+    "microsoft operating systems",
+    "microsoft os knowledge",
+    "hyper-v"
   ],
   "linux": [
     "linux os",
@@ -27,7 +36,16 @@
     "unix",
     "bash",
     "shell scripting",
-    "rocky linux"
+    "rocky linux",
+    "linux environment",
+    "linux environments",
+    "linux / unix environment",
+    "linux/unix environment",
+    "embedded linux",
+    "redhat",
+    "linux kernel drivers",
+    "yocto",
+    "buildroot"
   ],
   "python": [
     "python 3",
@@ -39,11 +57,15 @@
     "js",
     "es6",
     "es2015",
+    "javascript/typescript"
+  ],
+  "node.js":[
     "vanilla js",
     "node.js",
     "nodejs",
     "node",
-    "javascript/typescript"
+    "node-js",
+    "nestjs"
   ],
   "typescript": [
     "ts",
@@ -57,19 +79,20 @@
     "git/github",
     "source control",
     "source control (git)",
-    "version control tools"
+    "version control tools",
+    "gitops",
+    "svn",
+    "subversion",
+    "source code revision control",
+    "git-based source control",
+    "git-based source control environments"
   ],
   "sql": [
     "mysql",
     "postgresql",
     "postgres",
     "sqlite",
-    "mssql",
-    "microsoft sql server",
-    "t-sql",
-    "pl/sql",
-    "database queries",
-    "relational databases"
+    "database queries"
   ],
   "rest api": [
     "rest",
@@ -84,13 +107,20 @@
     "web api",
     "rest/grpc apis",
     "rest api design",
-    "rest/soap apis"
+    "rest/soap apis",
+    "rest api development",
+    "open api",
+    "openapi",
+    "openapi / swagger",
+    "web api / restful services"
   ],
   "docker": [
     "containerisation",
     "containerization",
     "containers",
-    "docker compose"
+    "docker compose",
+    "container",
+    "container technology"
   ],
   "ci/cd": [
     "continuous integration",
@@ -101,7 +131,12 @@
     "jenkins",
     "pipelines",
     "ci/cd pipelines",
-    "ci/cd practices"
+    "ci/cd practices",
+    "ci/cd tools",
+    "ci/cd fundamentals",
+    "ci/cd pipelines and devops practices",
+    "bamboo",
+    "bitbucket pipelines"
   ],
   "agile": [
     "agile methodology",
@@ -112,7 +147,12 @@
     "sprint",
     "agile/scrum",
     "agile and scrum methodologies",
-    "agile delivery environments"
+    "agile delivery environments",
+    "scrum methodologies",
+    "agile environment",
+    "agile environments",
+    "agile practices",
+    "large-scale agile environments"
   ],
   "microsoft 365": [
     "m365",
@@ -126,7 +166,14 @@
     "teams",
     "sharepoint",
     "onedrive",
-    "ms teams"
+    "ms teams",
+    "microsoft 365 administration",
+    "365 support",
+    "exchange online",
+    "microsoft 365 (teams, outlook, sharepoint)",
+    "microsoft office (excel, word, teams, outlook)",
+    "microsoft office 365 deployment and management",
+    "excel"
   ],
   "active directory": [
     "ad",
@@ -135,7 +182,10 @@
     "microsoft entra",
     "entra id",
     "ldap",
-    "identity management"
+    "identity management",
+    "active directory - entra",
+    "microsoft entra id",
+    "azure ad / entra id"
   ],
   "networking": [
     "computer networking",
@@ -152,7 +202,20 @@
     "switching",
     "routing",
     "connectivity troubleshooting",
-    "ip networking"
+    "ip networking",
+    "network monitoring",
+    "networking concepts",
+    "networking knowledge",
+    "networking fundamentals",
+    "networking concepts (routers, switches, firewalls)",
+    "networking (routers, switches, firewalls)",
+    "network fundamentals (firewalls, switches, vpns)",
+    "network fundamentals (vpn, dns, dhcp)",
+    "vpns",
+    "lan/wan",
+    "ip-based protocols",
+    "dns management",
+    "network management knowledge/experience"
   ],
   "troubleshooting": [
     "technical troubleshooting",
@@ -168,7 +231,33 @@
     "help desk",
     "service desk",
     "wi-fi troubleshooting",
-    "troubleshooting and problem-solving"
+    "troubleshooting and problem-solving",
+    "problem-solving",
+    "problem-solving skills",
+    "strong problem-solving skills",
+    "application support",
+    "hardware support",
+    "it help desk",
+    "it help desk experience",
+    "it help desk support",
+    "it help-desk",
+    "helpdesk management",
+    "helpdesk ticketing systems",
+    "help desk experience",
+    "help desk roles",
+    "level 1 it support",
+    "previous experience in it support, helpdesk, or service desk",
+    "prior helpdesk exposure",
+    "software installation",
+    "software installations",
+    "remote access tools",
+    "remote support tools",
+    "software support",
+    "basic pc skills",
+    "basic network troubleshooting skills",
+    "system configuration",
+    "technical support experience",
+    "technical support"
   ],
   "java": [
     "java 8",
@@ -183,7 +272,8 @@
   "c++": [
     "c/c++",
     "c / c++",
-    "cpp"
+    "cpp",
+    "c++ build systems"
   ],
   "ai": [
     "artificial intelligence",
@@ -197,18 +287,38 @@
     "genai",
     "prompt engineering",
     "github copilot",
-    "ai tools"
+    "ai tools",
+    "generative ai",
+    "ai agent patterns",
+    "ai tools (e.g., chatgpt, claude)",
+    "agents",
+    "generative ai product development experience",
+    "explainable ai models",
+    "rag",
+    "pgvector",
+    "weaviate",
+    "pinecone",
+    "amazon bedrock",
+    "autonomous decision-making algorithms",
+    "llm apis",
+    "llm-powered features (retrieval, evaluation, guardrails)",
+    "vector databases (pinecone, weaviate, pgvector)"
   ],
   "jira": [
     "atlassian jira",
     "jira software",
     "issue tracking",
-    "ticket management"
+    "ticket management",
+    "confluence",
+    "jira and confluence",
+    "atlassian product suite (jira, confluence etc.)",
+    "clickup"
   ],
   "html": [
     "html5",
     "html/css",
-    "markup"
+    "markup",
+    "html5 and css3"
   ],
   "css": [
     "css3",
@@ -221,7 +331,9 @@
     "mdm",
     "mobile device management",
     "endpoint management",
-    "microsoft endpoint manager"
+    "microsoft endpoint manager",
+    "mdm solutions",
+    "sccm"
   ],
   "application development": [
     "web-based applications development",
@@ -232,11 +344,34 @@
     "web application development principles",
     "full stack development",
     "windows applications development",
-    "web application development"
+    "web application development",
+    "saas application development (b2b)",
+    "cross-platform application development",
+    "video streaming application development",
+    "video streaming application development experience",
+    "web-based system development",
+    "eclipse plugin development",
+    "full-stack development",
+    "modern web development",
+    "cms development",
+    "software development",
+    "software engineering",
+    "backend engineering",
+    "backend coding",
+    "backend development (node.js, php, python)",
+    "b2b web applications",
+    "multi-tenancy saas applications"
   ],
   "software development life cycle": [
     "SDLC",
-    "software development lifecycle (sdlc)"
+    "software development lifecycle (sdlc)",
+    "software development practices",
+    "secure development practices",
+    "open-source software development",
+    "software development in the medical sector",
+    "medical sector software development exposure",
+    "medical sector software development experience",
+    "coding standards and software development best practices"
   ],
   "aws": [
     "amazon web services",
@@ -245,7 +380,23 @@
     "aws infrastructure",
     "aws sam",
     "aws lambda",
-    "aws cloudformation"
+    "aws cloudformation",
+    "amazon web services (aws)",
+    "aws (lambda, api gateway)",
+    "aws (s3, lambda)",
+    "aws cloud ecosystem",
+    "aws iot core",
+    "aws certified developer (or equivalent aws certifications)",
+    "lambda",
+    "rds",
+    "eventbridge",
+    "cloudwatch",
+    "route53",
+    "vpc",
+    "iam",
+    "cloudformation",
+    "cdk",
+    "ecs"
   ],
   "aws ec2": [
     "aws ec2",
@@ -263,7 +414,12 @@
     "microsoft azure",
     "azure cloud",
     "azure services",
-    "azure infrastructure"
+    "azure infrastructure",
+    "azure app services",
+    "service bus",
+    "cosmos db",
+    "azure sql",
+    "blob storage"
   ],
   "devops": [
     "development operations",
@@ -275,7 +431,10 @@
     "dev & ops",
     "devops practices",
     "devops culture",
-    "dev-ops"
+    "dev-ops",
+    "azure devops",
+    "devops activities",
+    "devops scripting"
   ],
   "LLM": [
     "large language models",
@@ -284,7 +443,14 @@
     "chatgpt",
     "gemini",
     "llm applications",
-    "ai/llm integration "
+    "ai/llm integration",
+    "claude",
+    "anthropic claude",
+    "openai apis",
+    "mcp",
+    "ai / llm integration",
+    "ai/llm api integration",
+    "llm-powered features (retrieval, evaluation, guardrails)"
   ],
   "ai-assisted development": [
     "ai-assisted coding",
@@ -295,7 +461,11 @@
     "ai code review",
     "claude code",
     "Codex",
-    "ai-assisted tools"
+    "ai-assisted tools",
+    "cursor",
+    "copilot",
+    "frontier ai coding tools",
+    "ai-assisted development tools (e.g., github copilot)"
   ],
   "scripting": [
     "automation scripting",
@@ -303,7 +473,15 @@
     "python scripting",
     "powershell scripting",
     "bash scripting",
-    "scripting languages"
+    "scripting languages",
+    "george scripting",
+    "devops scripting",
+    "scripting language",
+    "c++ or vb scripting",
+    "awk",
+    "python or similar languages (scripting)",
+    "scripting or automation skills",
+    "programming/scripting skills"
   ],
   "api": [
     "application programming interface",
@@ -316,10 +494,14 @@
   "nv1 clearance": [
     "nv1",
     "nv1 security clearance",
-    "security clearance"
+    "security clearance",
+    "baseline security clearance / nv-2 security clearance"
   ],
   "programming": [
-    "scripting"
+    "programming languages",
+    "functional programming",
+    "programming language theory",
+    "aspect-oriented programming"
   ],
   "itsm platforms": [
     "service now",
@@ -329,9 +511,259 @@
     "ivanti",
     "itsm tools",
     "itsm ticketing tools",
-    "itsm platform"
+    "itsm platform",
+    "ticketing platforms",
+    "itsm ticketing tool",
+    "familiarity with helpdesk or ticketing systems",
+    "rmm systems",
+    "rmm tools",
+    "manageengine",
+    "zendesk",
+    "psa tools"
   ],
   "hardware setup": [
-    "hardware configuration"
+    "hardware configuration",
+    "hardware deployment",
+    "device setup",
+    "printer/scanner support",
+    "cabling organisation",
+    "build and configure a desktop pc from the ground up",
+    "ability to build and configure a desktop pc from the ground up",
+    "computer hardware knowledge",
+    "peripherals and computer hardware knowledge",
+    "eft terminals"
+  ],
+  "c#": [
+    "c# / .net",
+    "c#/.net (asp.net core)",
+    "c#/.net (core)",
+    "c#/.net (including .net 6/8+)",
+    "c#/.net core",
+    "store commerce (c# / typescript)"
+  ],
+  ".net": [
+    ".net",
+    ".net core",
+    ".net 5+",
+    ".net (6/8+)",
+    ".net (v5 or above)",
+    ".net / asp.net core",
+    "asp.net",
+    "asp.net core",
+    "asp.net core/web api",
+    "entity framework",
+    "signalr",
+    "winforms"
+  ],
+  "react": [
+    "recoil",
+    "jotai",
+    "react(next.js's csr, ssr, isr implementation)"
+  ],
+  "next.js": [
+    "nextjs",
+    "next.js (app router/pages router)",
+    "ssr/ssg apps",
+    "react/nextjs"
+  ],
+  "angular": [
+    "angular (v12 or above)",
+    "angular or react"
+  ],
+  "vue.js": [
+    "vue",
+    "vue.js",
+    "frontend frameworks (react, vue)"
+  ],
+  "redux": [],
+  "php": [
+    "php (laravel)"
+  ],
+  "laravel": [
+    "php (laravel)"
+  ],
+  "django": [],
+  "wordpress": [
+    "craft cms",
+    "strapi",
+    "directus"
+  ],
+  "graphql": [
+    "graphql apis"
+  ],
+  "kafka": [
+    "rabbitmq",
+    "kafka/rabbitmq (event-driven systems)",
+    "event-driven architecture",
+    "event-driven architectures",
+    "event-driven or messaging systems (kafka/rabbitmq)",
+    "messaging frameworks",
+    "sqs"
+  ],
+  "kubernetes": [
+    "helm charts",
+    "amazon eks"
+  ],
+  "terraform": [
+    "pulumi",
+    "infrastructure as code"
+  ],
+  "ansible": [],
+  "servicenow": [
+    "flow designer",
+    "script includes",
+    "cmdb"
+  ],
+  "mobile development": [
+    "android development",
+    "ios",
+    "flutter/dart",
+    "native mobile development",
+    "react native",
+    "swift",
+    "kotlin",
+    "mobile or desktop app development"
+  ],
+  "go": [],
+  "rust": [],
+  "perl": [],
+  "delphi": [],
+  "powerbuilder": [],
+  "nosql": [
+    "nosql databases",
+    "nosql databases (postgresql, mysql, mongodb)"
+  ],
+  "mongodb": [],
+  "elasticsearch": [
+    "elastic (elk) stack",
+    "elastic stack (elk)",
+    "solr"
+  ],
+  "data engineering": [
+    "etl",
+    "etl patterns",
+    "nifi"
+  ],
+  "database management": [
+    "data modeling",
+    "data modelling",
+    "database architecture",
+    "database design and architecture",
+    "databases"
+  ],
+  "tableau": [
+    "crystal reports",
+    "reporting automation"
+  ],
+  "google cloud": [
+    "google workspace",
+    "google analytics",
+    "google tag manager"
+  ],
+  "seo": [
+    "seo principles",
+    "seo understanding",
+    "understanding of seo"
+  ],
+  "ui/ux": [
+    "ux",
+    "ui/ux design",
+    "ux design principles",
+    "ux design understanding",
+    "user experience (ux)",
+    "user experience (ux) best practices",
+    "user experience (ux) understanding",
+    "ux understanding",
+    "responsive design"
+  ],
+  "accessibility": [
+    "accessibility standards",
+    "wcag standards knowledge"
+  ],
+  "testing": [
+    "automated testing",
+    "manual testing",
+    "functional testing",
+    "system testing",
+    "black box testing",
+    "white box testing",
+    "unit testing (tdd/bdd)",
+    "test automation / qe automation tools",
+    "test automation (qe tools)",
+    "test automation/qe automation tools",
+    "performance, load and integration testing",
+    "automated testing frameworks",
+    "responsive testing",
+    "cross-browser checks",
+    "clean code",
+    "clean code testing",
+    "istqb",
+    "jest",
+    "cypress",
+    "selenium",
+    "playwright",
+    "mocha"
+  ],
+  "powershell": [],
+  "oauth2": [
+    "oauth 2.0",
+    "saml 2.0",
+    "oidc",
+    "jwt",
+    "authentication/authorisation"
+  ],
+  "vmware": [],
+  "observability": [
+    "observability tools",
+    "observability/monitoring",
+    "observability/monitoring practices",
+    "observability/monitoring tools",
+    "observability and monitoring practices"
+  ],
+  "security": [
+    "cloud security",
+    "cybersecurity experience",
+    "endpoint security",
+    "siem",
+    "edr",
+    "endpoint protection products",
+    "cyber security products",
+    "privacy and security principles",
+    "privacy principles",
+    "security principles",
+    "web security standards",
+    "acsc essential eight framework"
+  ],
+  "itil": [
+    "itil certification (itil foundation/itil service manager)",
+    "itil foundation certification",
+    "itil frameworks",
+    "itil practices"
+  ],
+  "macos": [
+    "macos os",
+    "apple support",
+    "apple school manager"
+  ],
+  "基本情報技術者": [],
+  "応用情報技術者": [],
+  "toeic": [
+    "toeic 700+ (toeic700点以上)",
+    "toeic700+"
+  ],
+  "mulesoft": [
+    "mulesoft 4",
+    "mulesoft 4.x",
+    "anypoint platform",
+    "anypoint mq",
+    "anypoint studio 7.x",
+    "raml",
+    "dataweave",
+    "cloudhub migration activities"
+  ],
+  "dynamics 365": [
+    "d365 f&o",
+    "x++",
+    "microsoft certifications (d365 f&o developer associate)"
   ]
 }

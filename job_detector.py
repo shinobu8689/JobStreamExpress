@@ -36,12 +36,53 @@ URL_JOB_PATTERNS = [
     r"au\.indeed\.com/",
 ]
 
+# ── Japanese job board URL patterns ──────────────────────────────────────────
+
+URL_JP_JOB_PATTERNS = [
+    r"rikunabi\.com",
+    r"mynavi\.jp",
+    r"doda\.jp",
+    r"en-japan\.com",
+    r"wantedly\.com",
+    r"green-japan\.com",
+    r"typejob\.net",
+    r"careercross\.com",
+    r"daijob\.com",
+    r"jac-recruitment\.co\.jp",
+    r"lapras\.com",
+    r"offers\.jp",
+    r"gaijinpot\.com",
+    r"bighope\.jp",
+    r"job\.nikkei\.com",
+    r"jp\.indeed\.com",
+    r"jobs\.m3\.com",           # M3 (medical)
+    r"jobmedley\.com",
+    r"workport\.co\.jp",
+    r"rjob\.jp",
+]
+
 JOB_CONTENT_SIGNALS = [
     "job description", "responsibilities", "qualifications", "requirements",
     "what you'll do", "what you will do", "about the role", "about this role",
     "we are looking for", "we're looking for", "minimum qualifications",
     "apply now", "apply for this job", "years of experience",
     "salary range", "compensation", "equal opportunity employer",
+]
+
+# Japanese content signals — present on virtually every Japanese job listing
+JOB_CONTENT_SIGNALS_JA = [
+    "仕事内容",    # job description / duties
+    "応募資格",    # application requirements
+    "必須スキル",  # required skills
+    "歓迎スキル",  # preferred / welcome skills
+    "業務内容",    # business/work content
+    "給与",        # salary
+    "勤務地",      # work location
+    "正社員",      # full-time employee
+    "求人",        # job offer / recruitment
+    "応募する",    # apply
+    "福利厚生",    # benefits / welfare
+    "雇用形態",    # employment type
 ]
 
 MIN_SIGNALS_REQUIRED = 2
@@ -70,11 +111,52 @@ POSTED_RE = re.compile(
 
 def is_job_page(html: str, url: str = "") -> bool:
     """True if the page is a job listing (URL heuristic first, then content signals)."""
-    if any(re.search(p, url.lower()) for p in URL_JOB_PATTERNS):
+    all_url_patterns = URL_JOB_PATTERNS + URL_JP_JOB_PATTERNS
+    if any(re.search(p, url.lower()) for p in all_url_patterns):
         return True
     soup = BeautifulSoup(html, "html.parser")
-    text = soup.get_text(separator=" ").lower()
-    return sum(1 for s in JOB_CONTENT_SIGNALS if s in text) >= MIN_SIGNALS_REQUIRED
+    text = soup.get_text(separator=" ")
+    en_hits = sum(1 for s in JOB_CONTENT_SIGNALS if s in text.lower())
+    ja_hits = sum(1 for s in JOB_CONTENT_SIGNALS_JA if s in text)
+    return en_hits >= MIN_SIGNALS_REQUIRED or ja_hits >= 2
+
+
+def detect_page_language(html: str, url: str = "") -> str:
+    """
+    Returns 'ja' if the page is predominantly Japanese, 'en' otherwise.
+
+    Detection order:
+      1. HTML <html lang="ja"> attribute — most reliable
+      2. URL match against known Japanese job board patterns
+      3. Japanese character ratio in page text (hiragana / katakana / kanji)
+    """
+    soup = BeautifulSoup(html, "html.parser")
+
+    # 1. HTML lang attribute
+    html_tag = soup.find("html")
+    if html_tag:
+        lang = html_tag.get("lang", "")
+        if isinstance(lang, str) and lang.lower().startswith("ja"):
+            return "ja"
+
+    # 2. URL matches a known Japanese job board
+    if any(re.search(p, url.lower()) for p in URL_JP_JOB_PATTERNS):
+        return "ja"
+
+    # 3. Japanese character ratio (hiragana U+3040-309F, katakana U+30A0-30FF,
+    #    CJK unified ideographs U+4E00-9FFF cover kanji shared with Chinese,
+    #    but combined with hiragana/katakana presence this is reliable enough)
+    text = soup.get_text()
+    if text:
+        ja_chars = sum(
+            1 for c in text
+            if "぀" <= c <= "ヿ"   # hiragana + katakana
+            or "一" <= c <= "鿿"   # CJK ideographs (kanji)
+        )
+        if ja_chars / len(text) > 0.05:
+            return "ja"
+
+    return "en"
 
 
 def extract_job_content(html: str) -> "dict | str":

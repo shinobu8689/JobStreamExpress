@@ -11,10 +11,11 @@ background. Multiple clicks queue up and are handled one at a time.
 
 import asyncio
 import os
+import re
 from pathlib import Path
 from playwright.async_api import async_playwright, Page, Frame
 
-from job_detector import is_job_page, extract_job_content
+from job_detector import is_job_page, extract_job_content, detect_page_language
 from job_cleaner import clean_job
 from job_analyser import analyse_job, print_report, report_exists
 from skill_registry import startup_update
@@ -99,8 +100,14 @@ async def pipeline_worker() -> None:
             print(f"\n[worker] Processing → {url}\n")
 
             # ── Step 1: extract ───────────────────────────────────────────────
+            lang     = detect_page_language(html, url)
+            lang_tag = "Japanese 🇯🇵" if lang == "ja" else "English"
+            print(f"[detector] Language: {lang_tag}")
+
             raw      = extract_job_content(html)
             job_text = dict_to_string(raw) if isinstance(raw, dict) else raw
+
+            _save_debug("raw", job_text, url)
 
             # ── Step 2: clean + keyword scan ──────────────────────────────────
             clean = clean_job(job_text)
@@ -110,8 +117,10 @@ async def pipeline_worker() -> None:
                 print(f"[worker] Discarded — avoid keyword hit.\n")
                 continue
 
+            _save_debug("cleaned", clean.cleaned_text, url)
+
             # ── Step 3: LLM analysis + report ─────────────────────────────────
-            result = analyse_job(clean.cleaned_text)
+            result = analyse_job(clean.cleaned_text, lang=lang, url=url)
             if result is not None:
                 print_report(result, url=url)
 
@@ -132,6 +141,17 @@ async def pipeline_worker() -> None:
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
+_TEMP_DIR = Path(__file__).parent / "temp"
+
+def _save_debug(label: str, text: str, url: str) -> None:
+    """Save raw or cleaned job text to temp/ for inspection."""
+    _TEMP_DIR.mkdir(exist_ok=True)
+    slug = re.sub(r"[^\w\-]", "_", url)[-60:]
+    path = _TEMP_DIR / f"{label}_{slug}.txt"
+    path.write_text(text, encoding="utf-8")
+    print(f"[debug] {label:7s} → temp/{path.name}  ({len(text)} chars)")
+
 
 def dict_to_string(info: dict) -> str:
     """Format a Seek structured dict into plain text for the pipeline."""

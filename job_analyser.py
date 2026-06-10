@@ -37,14 +37,15 @@ BASE_DIR    = Path(__file__).parent
 CONFIG_DIR  = BASE_DIR / "config"
 PROMPT_DIR  = BASE_DIR / "prompts"
 
-LLM_CONFIG_FILE = CONFIG_DIR / "llm_config.txt"
-PROFILE_FILE    = CONFIG_DIR / "profile.json"
-ALIASES_FILE    = CONFIG_DIR / "skill_aliases.json"
-ANALYSE_PROMPT  = PROMPT_DIR / "analyse.txt"
+LLM_CONFIG_FILE  = CONFIG_DIR / "llm_config.txt"
+PROFILE_FILE     = CONFIG_DIR / "profile.json"
+ALIASES_FILE     = CONFIG_DIR / "skill_aliases.json"
+ANALYSE_PROMPT   = PROMPT_DIR / "analyse.txt"
+ANALYSE_PROMPT_JA = PROMPT_DIR / "analyse_ja.txt"
 
 DEFAULT_MODEL      = "gemma3:12b"
 DEFAULT_OLLAMA_URL = "http://localhost:11434/api/generate"
-DEFAULT_MAX_TOKENS = 2048
+DEFAULT_MAX_TOKENS = 4096
 
 
 # ── Skill normaliser ──────────────────────────────────────────────────────────
@@ -197,18 +198,40 @@ class AnalysisResult:
 
 # ── Core analysis pipeline ────────────────────────────────────────────────────
 
-def analyse_job(cleaned_text: str) -> AnalysisResult | None:
+def _save_temp(label: str, text: str, url: str = "") -> None:
+    """Save a debug file to temp/ — label is used as the filename prefix."""
+    temp_dir = BASE_DIR / "temp"
+    temp_dir.mkdir(exist_ok=True)
+    slug = re.sub(r"[^\w\-]", "_", url)[-60:] if url else "latest"
+    path = temp_dir / f"{label}_{slug}.txt"
+    path.write_text(text, encoding="utf-8")
+    print(f"[analyser] {label:10s} → temp/{path.name}  ({len(text)} chars)")
+
+
+def analyse_job(cleaned_text: str, lang: str = "en", url: str = "") -> AnalysisResult | None:
     cfg     = load_llm_config()
     profile = load_profile()
     norm    = get_normaliser()
 
-    print(f"[analyser] ⟲  Calling {cfg['model']}...")
+    # Truncate input to prevent context-window overflow.
+    # Japanese characters are information-dense; 5000 chars covers a full job post.
+    max_chars = 5000 if lang == "ja" else 8000
+    if len(cleaned_text) > max_chars:
+        cleaned_text = cleaned_text[:max_chars]
+        print(f"[analyser] ⚠  Input truncated to {max_chars} chars")
+
+    prompt_file = ANALYSE_PROMPT_JA if lang == "ja" else ANALYSE_PROMPT
+    lang_tag    = "ja 🇯🇵" if lang == "ja" else "en"
+    print(f"[analyser] ⟲  Calling {cfg['model']} (lang={lang_tag})...")
     try:
-        prompt  = load_prompt(ANALYSE_PROMPT, text=cleaned_text)
+        prompt  = load_prompt(prompt_file, text=cleaned_text)
+        _save_temp("prompt", prompt, url)
         raw_llm = call_ollama(prompt, cfg)
     except Exception as e:
         print(f"[analyser] ✗  LLM call failed: {e}")
         return None
+
+    _save_temp("llm", raw_llm, url)
 
     try:
         data = parse_json_response(raw_llm)
@@ -396,7 +419,7 @@ def report_exists(url: str) -> tuple[bool, str | None]:
 
 def print_report(result: AnalysisResult, url: str = "") -> tuple[str, str]:
     """Build, print, save the report. Returns (folder, file_path_str)."""
-    report_text, label, folder = build_report(result, url)
+    report_text, _, folder = build_report(result, url)
     print(report_text)
     path = save_report(report_text, folder, url)
     print(f"  📄 Saved → reports/{folder}/{path.name}\n")

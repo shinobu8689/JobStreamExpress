@@ -57,11 +57,24 @@ DEFAULT_FLUFF_KEYWORDS = [
     "right to work in australia",
     "must be an australian",
     "applicants must have",          # too vague on its own — pair with work rights context
+    # Japanese — metadata and page noise lines
+    "原稿id",                        # internal manuscript ID
+    "掲載開始日",                    # posting start date
+    "掲載終了日",                    # posting end date
+    "掲載期間",                      # posting period
+    "このページをシェア",            # "share this page"
+    "お気に入りに追加",              # "add to favourites"
+    "印刷する",                      # "print"
+    "ページトップへ",                # "back to page top"
+    "求人情報をシェア",              # "share job info"
+    "※決済単位",                    # payment unit footnote (financial filing metadata)
+    "決算情報",                      # financial results info (not relevant to job)
 ]
 
 # Sections whose headings signal the start of company-promo content.
 # Everything from this heading onward is dropped.
 SECTION_CUTOFF_HEADERS = [
+    # English — company promo sections
     "about us",
     "who we are",
     "our story",
@@ -76,7 +89,55 @@ SECTION_CUTOFF_HEADERS = [
     "inclusion",
     "belonging",
     "perks and benefits",    # keep "benefits" alone — it's useful; full phrase is promo
+    # Japanese — navigation / recommendation sections that follow the job post
+    "関連条件で探す",        # "search by related conditions"
+    "この求人に関連する求人", # "jobs related to this posting"
+    "関連する求人",          # "related jobs"
+    "類似の求人",            # "similar jobs"
+    "おすすめ求人",          # "recommended jobs"
+    "この企業の他の求人",    # "other jobs at this company" (navigation block)
+    "他の求人を見る",        # "see other jobs"
+    "求人を探す",            # "search for jobs" (site nav leaked in)
+    "条件を変えて探す",      # "search with different conditions"
+    "この条件の新着求人",    # "new jobs matching these conditions"
+    # Japanese — recruiter / disclaimer sections at page bottom
+    "紹介企業情報",          # recruiting agency's own company profile
+    "問題を報告する",        # "report a problem" — end-of-page marker
+    "求人エントリーにあたって", # application disclaimer block
+    "仕事に関するpr",        # "job PR" section — usually repeats the description
 ]
+
+
+# ── Japanese section-level filter ────────────────────────────────────────────
+#
+# Some sections are entirely low-signal (benefits details, hours).
+# Others (company info) should be collapsed to a single key field.
+# These constants drive a state-machine pass in clean_job().
+
+# Sections to drop in full (header + all content until the next section)
+JA_SKIP_SECTIONS = {
+    "待遇・福利厚生",   # benefits details — verbose, low signal for matching
+    "勤務時間",         # working-hours details
+    "休日・休暇",       # holiday / vacation details
+    "試用期間",         # trial period — duration already in the header zone
+    "賃金形態",         # salary form details (redundant after the salary line)
+}
+
+# Sections to keep partially — only lines that contain one of the given keywords
+JA_PARTIAL_SECTIONS: dict[str, list[str]] = {
+    "採用企業情報": ["事業内容"],   # company info → keep only the business description
+}
+
+# Any of these headers signals the start of a new section (exits skip/partial state)
+JA_SECTION_HEADERS = {
+    "仕事概要", "仕事内容", "仕事の内容", "求めている人材", "必要な経験・能力等",
+    "職場環境", "勤務地", "予定勤務地", "給与", "雇用形態", "賃金形態",
+    "勤務時間", "休日・休暇", "待遇・福利厚生", "試用期間",
+    "採用企業情報", "採用企業情報・求人取扱いエージェント",
+    "応募について", "選考の流れ", "応募する", "学歴・資格",
+    "配属先情報", "紹介企業情報", "備考", "求人エントリーにあたって",
+    "募集職種", "仕事に関するpr", "企業・求人の特色", "仕事の特徴",
+}
 
 
 # ── Experience extraction ─────────────────────────────────────────────────────
@@ -184,6 +245,54 @@ def clean_job(text: str,
     cfg_avoid, cfg_fluff = load_config()
     avoid_kw = [k.lower() for k in (avoid_keywords or cfg_avoid)]
     fluff_kw = [k.lower() for k in (fluff_keywords or cfg_fluff)]
+
+    # ── 0. Navigation artifact removal ───────────────────────────────────────
+    # Strips breadcrumb links and separator chars leaked from HTML rendering.
+    # Targets:  [text](/relative-path)  and lone separator chars like  /  |  ›
+    _NAV_LINK_RE = re.compile(r"^\[.{0,50}\]\(/[^)]*\)\s*$")
+    _NAV_SEP     = {"/", "|", "›", "»", "·", "・"}
+    nav_stripped = []
+    for ln in text.splitlines():
+        s = ln.strip()
+        if s in _NAV_SEP or _NAV_LINK_RE.match(s):
+            continue
+        nav_stripped.append(ln)
+    text = "\n".join(nav_stripped)
+
+    # ── 0b. Japanese section filter ───────────────────────────────────────────
+    # State-machine: drops JA_SKIP_SECTIONS entirely; collapses JA_PARTIAL_SECTIONS
+    # to only the lines matching their keep-keywords.
+    ja_mode = "normal"   # "normal" | "skip" | "partial"
+    ja_keep: list[str] = []
+    ja_out:  list[str] = []
+
+    for _ln in text.splitlines():
+        _s = _ln.strip()
+
+        if _s in JA_SKIP_SECTIONS:
+            ja_mode = "skip"
+            continue                         # drop the section header too
+
+        if _s in JA_PARTIAL_SECTIONS:
+            ja_mode = "partial"
+            ja_keep = JA_PARTIAL_SECTIONS[_s]
+            ja_out.append(_ln)              # keep the section header
+            continue
+
+        if ja_mode != "normal" and _s in JA_SECTION_HEADERS:
+            ja_mode = "normal"
+            ja_keep = []
+            # fall through — keep this new header
+
+        if ja_mode == "skip":
+            continue
+        elif ja_mode == "partial":
+            if any(kw in _s for kw in ja_keep):
+                ja_out.append(_ln)
+        else:
+            ja_out.append(_ln)
+
+    text = "\n".join(ja_out)
 
     # ── 1. Avoid-keyword scan ─────────────────────────────────────────────────
     #

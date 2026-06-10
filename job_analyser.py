@@ -406,27 +406,34 @@ def build_report(result: AnalysisResult, url: str = "") -> tuple[str, str, str]:
     # Skills comparison
     norm      = get_normaliser()
     trans     = result.skill_translations  # en → ja (empty for non-Japanese pages)
-    req       = [norm.normalise(s) for s in (d.get("skills") or [])]
-    opt       = [norm.normalise(s) for s in (d.get("optional_skills") or [])]
+    raw_req   = d.get("skills") or []
+    raw_opt   = d.get("optional_skills") or []
+    req_norm  = [norm.normalise(s) for s in raw_req]
+    opt_norm  = [norm.normalise(s) for s in raw_opt]
     matched   = set(result.matched_skills)
     opt_match = set(result.matched_optional)
     col_w     = 40
 
+    # Build reverse map for missing skills section: canonical → display name
+    norm_to_display: dict[str, str] = {}
+    for raw_s, norm_s in zip(raw_req + raw_opt, req_norm + opt_norm):
+        norm_to_display.setdefault(norm_s, _fmt_skill(raw_s, trans))
+
     lines.append(f"\n  {'● Required Skills':<{col_w}}  ● Optional Skills")
-    for i in range(max(len(req), len(opt), 1)):
+    for i in range(max(len(raw_req), len(raw_opt), 1)):
         left = right = ""
-        if i < len(req):
-            tick = "✔" if req[i] in matched else "✗"
-            left = f"  {tick}  {_fmt_skill(req[i], trans)}"
-        if i < len(opt):
-            tick = "✔" if opt[i] in opt_match else "-"
-            right = f"  {tick}  {_fmt_skill(opt[i], trans)}"
+        if i < len(raw_req):
+            tick = "✔" if req_norm[i] in matched else "✗"
+            left = f"  {tick}  {_fmt_skill(raw_req[i], trans)}"
+        if i < len(raw_opt):
+            tick = "✔" if opt_norm[i] in opt_match else "-"
+            right = f"  {tick}  {_fmt_skill(raw_opt[i], trans)}"
         lines.append(f"  {left:<{col_w}}  {right}")
 
     # Score bar
     score, label, folder = _score_label(result)
     n_hit  = len(result.matched_skills)
-    total  = len(req)
+    total  = len(raw_req)
     pct    = int(score * 100)
     filled = int(30 * score)
     bar    = "█" * filled + "░" * (30 - filled)
@@ -440,7 +447,7 @@ def build_report(result: AnalysisResult, url: str = "") -> tuple[str, str, str]:
     if result.missing_skills:
         lines.append("\n  ● Missing required skills:")
         for s in result.missing_skills:
-            lines.append(f"      ✗  {_fmt_skill(s, trans)}")
+            lines.append(f"      ✗  {norm_to_display.get(s) or _fmt_skill(s, trans)}")
 
     exp = d.get("min_experience_years")
     if exp:

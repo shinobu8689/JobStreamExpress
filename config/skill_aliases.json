@@ -151,7 +151,8 @@
     "cisco",
     "switching",
     "routing",
-    "connectivity troubleshooting"
+    "connectivity troubleshooting",
+    "ip networking"
   ],
   "troubleshooting": [
     "technical troubleshooting",
@@ -327,7 +328,8 @@
     "freshservice",
     "ivanti",
     "itsm tools",
-    "itsm ticketing tools"
+    "itsm ticketing tools",
+    "itsm platform"
   ],
   "hardware setup": [
     "hardware configuration"

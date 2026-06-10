@@ -27,6 +27,9 @@ PROFILE_DIR  = str(Path.home() / ".job_scraper_profile")
 START_URL    = "about:blank"
 GLANCE_SECS  = 3     # seconds to display "queued" message before clearing
 
+# Set True to save raw/cleaned text to temp/ when processing Japanese pages.
+DEBUG_JA     = True
+
 
 # ── Shared state ──────────────────────────────────────────────────────────────
 
@@ -107,7 +110,8 @@ async def pipeline_worker() -> None:
             raw      = extract_job_content(html)
             job_text = dict_to_string(raw) if isinstance(raw, dict) else raw
 
-            _save_debug("raw", job_text, url)
+            if lang == "ja" and DEBUG_JA:
+                _save_debug("raw", job_text, url)
 
             # ── Step 2: clean + keyword scan ──────────────────────────────────
             clean = clean_job(job_text)
@@ -117,10 +121,12 @@ async def pipeline_worker() -> None:
                 print(f"[worker] Discarded — avoid keyword hit.\n")
                 continue
 
-            _save_debug("cleaned", clean.cleaned_text, url)
+            if lang == "ja" and DEBUG_JA:
+                _save_debug("cleaned", clean.cleaned_text, url)
 
             # ── Step 3: LLM analysis + report ─────────────────────────────────
-            result = analyse_job(clean.cleaned_text, lang=lang, url=url)
+            result = analyse_job(clean.cleaned_text, lang=lang, url=url,
+                                 debug=lang == "ja" and DEBUG_JA)
             if result is not None:
                 print_report(result, url=url)
 

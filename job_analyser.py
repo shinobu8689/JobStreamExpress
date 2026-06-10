@@ -25,7 +25,7 @@ Reports saved to:
 import json
 import re
 import requests
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from skill_registry import record_skills
@@ -194,6 +194,8 @@ class AnalysisResult:
     matched_optional: list[str]
     interest_hits:    list[str]
     profile:          dict
+    # Maps english_skill → original_japanese (populated only for Japanese pages)
+    skill_translations: dict[str, str] = field(default_factory=dict)
 
 
 # ── Core analysis pipeline ────────────────────────────────────────────────────
@@ -208,7 +210,35 @@ def _save_temp(label: str, text: str, url: str = "") -> None:
     print(f"[analyser] {label:10s} → temp/{path.name}  ({len(text)} chars)")
 
 
-def analyse_job(cleaned_text: str, lang: str = "en", url: str = "") -> AnalysisResult | None:
+def _is_japanese(text: str) -> bool:
+    return any('぀' <= c <= 'ヿ' or '一' <= c <= '鿿' for c in text)
+
+
+def _translate_ja_skills(ja_skills: list[str], cfg: dict) -> dict[str, str]:
+    """Translate Japanese skill names to English via LLM. Returns {japanese: english}."""
+    if not ja_skills:
+        return {}
+    skills_json = json.dumps(ja_skills, ensure_ascii=False)
+    prompt = (
+        "Translate these Japanese tech/job skill names to English. "
+        "Return ONLY a valid JSON object mapping each Japanese skill to its English translation. "
+        "Keep brand names, product names, and already-English terms unchanged. "
+        "Use lowercase for the English translations.\n\n"
+        f"Skills: {skills_json}\n\nOutput (JSON only):"
+    )
+    print(f"[analyser] ⟲  Translating {len(ja_skills)} Japanese skill name(s)...")
+    try:
+        raw = call_ollama(prompt, cfg)
+        data = parse_json_response(raw)
+        return {k: v.lower().strip() for k, v in data.items()
+                if isinstance(k, str) and isinstance(v, str)}
+    except Exception as e:
+        print(f"[analyser] ⚠  Skill translation failed: {e} — using original names")
+        return {}
+
+
+def analyse_job(cleaned_text: str, lang: str = "en", url: str = "",
+                debug: bool = False) -> AnalysisResult | None:
     cfg     = load_llm_config()
     profile = load_profile()
     norm    = get_normaliser()
@@ -225,19 +255,36 @@ def analyse_job(cleaned_text: str, lang: str = "en", url: str = "") -> AnalysisR
     print(f"[analyser] ⟲  Calling {cfg['model']} (lang={lang_tag})...")
     try:
         prompt  = load_prompt(prompt_file, text=cleaned_text)
-        _save_temp("prompt", prompt, url)
+        if debug:
+            _save_temp("prompt", prompt, url)
         raw_llm = call_ollama(prompt, cfg)
     except Exception as e:
         print(f"[analyser] ✗  LLM call failed: {e}")
         return None
 
-    _save_temp("llm", raw_llm, url)
+    if debug:
+        _save_temp("llm", raw_llm, url)
 
     try:
         data = parse_json_response(raw_llm)
     except ValueError as e:
         print(f"[analyser] ✗  JSON parse failed: {e}")
         return None
+
+    # ── Japanese skill translation ─────────────────────────────────────────────
+    # Translate Japanese skill names to English so profile matching and the
+    # registry stay English-only. Keep originals for display as "en [ja]".
+    skill_translations: dict[str, str] = {}  # en → ja (for display)
+
+    if lang == "ja":
+        raw_required = data.get("skills") or []
+        raw_optional = data.get("optional_skills") or []
+        ja_only = list({s for s in raw_required + raw_optional if _is_japanese(s)})
+        if ja_only:
+            ja_to_en = _translate_ja_skills(ja_only, cfg)  # {ja: en}
+            data["skills"]          = [ja_to_en.get(s, s) for s in raw_required]
+            data["optional_skills"] = [ja_to_en.get(s, s) for s in raw_optional]
+            skill_translations = {en: ja for ja, en in ja_to_en.items()}
 
     user_skills  = norm.normalise_set(profile.get("skills", []))
     job_required = [norm.normalise(s) for s in (data.get("skills") or [])]
@@ -247,8 +294,8 @@ def analyse_job(cleaned_text: str, lang: str = "en", url: str = "") -> AnalysisR
     missing_skills   = [s for s in job_required if s not in user_skills]
     matched_optional = [s for s in job_optional if s in user_skills]
 
-    # Record all skills seen for the registry
-    record_skills(list(set(job_required + job_optional)))
+    # Record only English skills in the registry (skip any untranslated Japanese)
+    record_skills([s for s in set(job_required + job_optional) if not _is_japanese(s)])
 
     # Interest match against title + responsibilities + company focus
     job_text_lower = " ".join(filter(None, [
@@ -266,6 +313,7 @@ def analyse_job(cleaned_text: str, lang: str = "en", url: str = "") -> AnalysisR
         matched_optional=matched_optional,
         interest_hits=interest_hits,
         profile=profile,
+        skill_translations=skill_translations,
     )
 
 
@@ -315,6 +363,11 @@ def _url_to_slug(url: str) -> str:
     return slug[:120]
 
 
+def _fmt_skill(skill: str, translations: dict[str, str]) -> str:
+    """Display the original Japanese name when available, English otherwise."""
+    return translations.get(skill.lower()) or skill
+
+
 def build_report(result: AnalysisResult, url: str = "") -> tuple[str, str, str]:
     """
     Build the full report as a string.
@@ -335,21 +388,22 @@ def build_report(result: AnalysisResult, url: str = "") -> tuple[str, str, str]:
 
     # Skills comparison
     norm      = get_normaliser()
+    trans     = result.skill_translations  # en → ja (empty for non-Japanese pages)
     req       = [norm.normalise(s) for s in (d.get("skills") or [])]
     opt       = [norm.normalise(s) for s in (d.get("optional_skills") or [])]
     matched   = set(result.matched_skills)
     opt_match = set(result.matched_optional)
-    col_w     = 34
+    col_w     = 40
 
     lines.append(f"\n  {'● Required Skills':<{col_w}}  ● Optional Skills")
     for i in range(max(len(req), len(opt), 1)):
         left = right = ""
         if i < len(req):
             tick = "✔" if req[i] in matched else "✗"
-            left = f"  {tick}  {req[i]}"
+            left = f"  {tick}  {_fmt_skill(req[i], trans)}"
         if i < len(opt):
             tick = "✔" if opt[i] in opt_match else "-"
-            right = f"  {tick}  {opt[i]}"
+            right = f"  {tick}  {_fmt_skill(opt[i], trans)}"
         lines.append(f"  {left:<{col_w}}  {right}")
 
     # Score bar
@@ -369,7 +423,7 @@ def build_report(result: AnalysisResult, url: str = "") -> tuple[str, str, str]:
     if result.missing_skills:
         lines.append("\n  ● Missing required skills:")
         for s in result.missing_skills:
-            lines.append(f"      ✗  {s}")
+            lines.append(f"      ✗  {_fmt_skill(s, trans)}")
 
     exp = d.get("min_experience_years")
     if exp:
